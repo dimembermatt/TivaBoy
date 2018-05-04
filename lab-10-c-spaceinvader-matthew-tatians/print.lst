@@ -1,0 +1,601 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000         ; Print.s
+    2 00000000         ; Student names: Matthew Yu and Tatian Flores
+    3 00000000         ; Last modification date: 3/24/18
+    4 00000000         ; Runs on LM4F120 or TM4C123
+    5 00000000         ; EE319K lab 7 device driver for any LCD
+    6 00000000         ;
+    7 00000000         ; As part of Lab 7, students need to implement these LCD
+                       _OutDec and LCD_OutFix
+    8 00000000         ; This driver assumes two low-level LCD functions
+    9 00000000         ; ST7735_OutChar   outputs a single 8-bit ASCII characte
+                       r
+   10 00000000         ; ST7735_OutString outputs a null-terminated string 
+   11 00000000         
+   12 00000000                 IMPORT           ST7735_OutChar
+   13 00000000                 IMPORT           ST7735_OutString
+   14 00000000                 EXPORT           LCD_OutDec
+   15 00000000                 EXPORT           LCD_OutFix
+   16 00000000         
+   17 00000000 0000270F 
+                       overflow
+                               EQU              0x270F
+   18 00000000                 AREA             |.text|, CODE, READONLY, ALIGN=
+2
+   19 00000000                 THUMB
+   20 00000000         
+   21 00000000         
+   22 00000000         
+   23 00000000         ;-----------------------LCD_OutDec----------------------
+                       -
+   24 00000000         ; Output a 32-bit number in unsigned decimal format
+   25 00000000         ; Input: R0 (call by value) 32-bit unsigned number
+   26 00000000         ; Output: none
+   27 00000000         ; Invariables: This function must not permanently modify
+                        registers R4 to R11
+   28 00000000 00000000 
+                       decPlace
+                               EQU              0           ;uint32_t
+   29 00000000 00000004 
+                       input   EQU              4           ;uint32_t
+   30 00000000         
+   31 00000000         LCD_OutDec
+   32 00000000 B082            SUB              SP, #8      ;alloc
+   33 00000002         ;store input
+   34 00000002 9001            STR              R0, [SP, #input]
+   35 00000004         
+   36 00000004         ;get # of decimal places (max divisor)
+   37 00000004 F04F 010A       MOV              R1, #10     ;base divisor
+   38 00000008 F04F 0200       MOV              R2, #0      ;decimal places
+   39 0000000C 2800            CMP              R0, #0
+   40 0000000E D102            BNE              checkPlace
+   41 00000010 F102 0201       ADD              R2, #1
+   42 00000014 E006            B                endPlace
+   43 00000016         checkPlace
+   44 00000016 2800            CMP              R0, #0
+   45 00000018 D004            BEQ              endPlace
+   46 0000001A FBB0 F0F1       UDIV             R0, R1      ;9/10 = 0, 19/10 = 
+                                                            1.9 = 1
+   47 0000001E F102 0201       ADD              R2, #1
+   48 00000022 E7F8            B                checkPlace
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+   49 00000024         endPlace
+   50 00000024         
+   51 00000024         ;store divisor
+   52 00000024 F88D 2000       STRB             R2, [SP, #decPlace]
+   53 00000028         
+   54 00000028         ;loop run - get largest decimal place value, output, the
+                       n continue until no more places
+   55 00000028         
+   56 00000028         loopOutput
+   57 00000028         ;restore input
+   58 00000028 9801            LDR              R0, [SP, #input]
+   59 0000002A F89D 2000       LDRB             R2, [SP, #decPlace]
+   60 0000002E F04F 0301       MOV              R3, #1
+   61 00000032 F04F 010A       MOV              R1, #10
+   62 00000036 2A00            CMP              R2, #0
+   63 00000038 D01A            BEQ              exit        ;exit if (div) plac
+                                                            e divisor is 0
+   64 0000003A         
+   65 0000003A         ;get place divisor
+   66 0000003A         placeDiv
+   67 0000003A 2A01            CMP              R2, #1
+   68 0000003C D004            BEQ              display
+   69 0000003E FB03 F301       MUL              R3, R1
+   70 00000042 F1A2 0201       SUB              R2, #1
+   71 00000046 E7F8            B                placeDiv    ;10^(div-1) = (div)
+                                                             place divisor 
+   72 00000048         ;get decimal place
+   73 00000048         
+   74 00000048         display
+   75 00000048         ;find modulo of 10^n
+   76 00000048 FBB0 F0F3       UDIV             R0, R3
+   77 0000004C         ;store new inp
+   78 0000004C 9901            LDR              R1, [SP, #input]
+   79 0000004E FB00 1113       MLS              R1, R0, R3, R1
+   80 00000052 9101            STR              R1, [SP, #input]
+   81 00000054         
+   82 00000054         ;display
+   83 00000054 B504            PUSH             {R2, LR}
+   84 00000056         ;output - 0ffset + output
+   85 00000056 F100 0030       ADD              R0, #48
+   86 0000005A F7FF FFFE       BL               ST7735_OutChar
+   87 0000005E E8BD 4004       POP              {R2, LR}
+   88 00000062         
+   89 00000062         ;reduce divisor for next loop, if any
+   90 00000062 F89D 2000       LDRB             R2, [SP, #decPlace]
+   91 00000066 F1A2 0201       SUB              R2, #1
+   92 0000006A F88D 2000       STRB             R2, [SP, #decPlace]
+   93 0000006E E7DB            B                loopOutput
+   94 00000070         
+   95 00000070         exit
+   96 00000070 B002            ADD              SP, #8      ;dealloc
+   97 00000072 4770            BX               LR
+   98 00000074         ;* * * * * * * * End of LCD_OutDec * * * * * * * *
+   99 00000074         
+  100 00000074         ; -----------------------LCD _OutFix--------------------
+                       --
+  101 00000074         ; Output characters to LCD display in fixed-point format
+                       
+  102 00000074         ; unsigned decimal, resolution 0.001, range 0.000 to 9.9
+
+
+
+ARM Macro Assembler    Page 3 
+
+
+                       99
+  103 00000074         ; Inputs:  R0 is an unsigned 32-bit number
+  104 00000074         ; Outputs: none
+  105 00000074         ; E.g., R0=0,    then output "0.000 "
+  106 00000074         ;       R0=3,    then output "0.003 "
+  107 00000074         ;       R0=89,   then output "0.089 "
+  108 00000074         ;       R0=123,  then output "0.123 "
+  109 00000074         ;       R0=9999, then output "9.999 "
+  110 00000074         ;       R0>9999, then output "*.*** "
+  111 00000074         ; Invariables: This function must not permanently modify
+                        registers R4 to R11
+  112 00000074 00000000 
+                       decPlace2
+                               EQU              0           ;uint32_t
+  113 00000074 00000004 
+                       input2  EQU              4           ;uint32_t
+  114 00000074         
+  115 00000074         LCD_OutFix
+  116 00000074 F242 710F       LDR              R1, =overflow
+  117 00000078 4281            CMP              R1, R0
+  118 0000007A D371            BLO              invalid
+  119 0000007C B510            PUSH             {R4, LR}
+  120 0000007E B082            SUB              SP, #8      ;alloc
+  121 00000080         ;store input
+  122 00000080 9001            STR              R0, [SP, #input2]
+  123 00000082         
+  124 00000082         ;get # of decimal places (max divisor)
+  125 00000082 F04F 010A       MOV              R1, #10     ;base divisor
+  126 00000086 F04F 0200       MOV              R2, #0      ;decimal places
+  127 0000008A 2800            CMP              R0, #0
+  128 0000008C D102            BNE              checkPlace2
+  129 0000008E F102 0201       ADD              R2, #1
+  130 00000092 E006            B                endPlace2
+  131 00000094         checkPlace2
+  132 00000094 2800            CMP              R0, #0
+  133 00000096 D004            BEQ              endPlace2
+  134 00000098 FBB0 F0F1       UDIV             R0, R1      ;9/10 = 0, 19/10 = 
+                                                            1.9 = 1
+  135 0000009C F102 0201       ADD              R2, #1
+  136 000000A0 E7F8            B                checkPlace2
+  137 000000A2         
+  138 000000A2         endPlace2
+  139 000000A2         ;store divisor
+  140 000000A2 F88D 2000       STRB             R2, [SP, #decPlace2]
+  141 000000A6         ;switch: decPlace case
+  142 000000A6 2A01            CMP              R2, #1
+  143 000000A8 D004            BEQ              case1
+  144 000000AA 2A02            CMP              R2, #2
+  145 000000AC D013            BEQ              case2
+  146 000000AE 2A03            CMP              R2, #3
+  147 000000B0 D01E            BEQ              case3
+  148 000000B2 E022            B                case4
+  149 000000B4         
+  150 000000B4         case1
+  151 000000B4 F04F 0030       MOV              R0, #48
+  152 000000B8 F7FF FFFE       BL               ST7735_OutChar
+  153 000000BC F04F 002E       MOV              R0, #46
+  154 000000C0 F7FF FFFE       BL               ST7735_OutChar
+  155 000000C4 F04F 0030       MOV              R0, #48
+
+
+
+ARM Macro Assembler    Page 4 
+
+
+  156 000000C8 F7FF FFFE       BL               ST7735_OutChar
+  157 000000CC F04F 0030       MOV              R0, #48
+  158 000000D0 F7FF FFFE       BL               ST7735_OutChar
+  159 000000D4 E011            B                loopOutput2
+  160 000000D6         
+  161 000000D6         case2
+  162 000000D6 F04F 0030       MOV              R0, #48
+  163 000000DA F7FF FFFE       BL               ST7735_OutChar
+  164 000000DE F04F 002E       MOV              R0, #46
+  165 000000E2 F7FF FFFE       BL               ST7735_OutChar
+  166 000000E6 F04F 0030       MOV              R0, #48
+  167 000000EA F7FF FFFE       BL               ST7735_OutChar
+  168 000000EE E004            B                loopOutput2
+  169 000000F0         
+  170 000000F0         case3
+  171 000000F0 F04F 0030       MOV              R0, #48
+  172 000000F4 F7FF FFFE       BL               ST7735_OutChar
+  173 000000F8 E7FF            B                loopOutput2
+  174 000000FA         
+  175 000000FA         case4
+  176 000000FA         loopOutput2
+  177 000000FA         ;restore input
+  178 000000FA 9801            LDR              R0, [SP, #input2]
+  179 000000FC F89D 2000       LDRB             R2, [SP, #decPlace2]
+  180 00000100 F04F 0301       MOV              R3, #1
+  181 00000104 F04F 010A       MOV              R1, #10
+  182 00000108 2A00            CMP              R2, #0
+  183 0000010A D025            BEQ              exit2       ;exit if (div) plac
+                                                            e divisor is 0
+  184 0000010C         ;get place divisor
+  185 0000010C         placeDiv2
+  186 0000010C 2A01            CMP              R2, #1
+  187 0000010E D004            BEQ              display2
+  188 00000110 FB03 F301       MUL              R3, R1
+  189 00000114 F1A2 0201       SUB              R2, #1
+  190 00000118 E7F8            B                placeDiv2   ;10^(div-1) = (div)
+                                                             place divisor 
+  191 0000011A         ;get decimal place
+  192 0000011A         
+  193 0000011A         display2
+  194 0000011A         ;find modulo of 10^n
+  195 0000011A FBB0 F0F3       UDIV             R0, R3
+  196 0000011E         ;store new inp
+  197 0000011E 9901            LDR              R1, [SP, #input2]
+  198 00000120 FB00 1113       MLS              R1, R0, R3, R1
+  199 00000124 9101            STR              R1, [SP, #input2]
+  200 00000126         
+  201 00000126         ;display
+  202 00000126 F89D 2000       LDRB             R2, [SP, #decPlace2]
+  203 0000012A B504            PUSH             {R2, LR}
+  204 0000012C         ;display asterisk at pos[1] if case 4 hits R2 == 3
+  205 0000012C 2A03            CMP              R2, #3
+  206 0000012E D106            BNE              continue
+  207 00000130         
+  208 00000130 B501            PUSH             {R0, LR}
+  209 00000132 F04F 002E       MOV              R0, #46
+  210 00000136 F7FF FFFE       BL               ST7735_OutChar
+  211 0000013A E8BD 4001       POP              {R0, LR}
+  212 0000013E         continue
+
+
+
+ARM Macro Assembler    Page 5 
+
+
+  213 0000013E F100 0030       ADD              R0, #48
+  214 00000142 F7FF FFFE       BL               ST7735_OutChar
+  215 00000146 E8BD 4004       POP              {R2, LR}
+  216 0000014A         
+  217 0000014A         ;reduce divisor for next loop, if any
+  218 0000014A F89D 2000       LDRB             R2, [SP, #decPlace2]
+  219 0000014E F1A2 0201       SUB              R2, #1
+  220 00000152 F88D 2000       STRB             R2, [SP, #decPlace2]
+  221 00000156 E7D0            B                loopOutput2
+  222 00000158         
+  223 00000158         
+  224 00000158         exit2
+  225 00000158 B002            ADD              SP, #8      ;alloc
+  226 0000015A E8BD 4010       POP              {R4, LR}
+  227 0000015E 4770            BX               LR
+  228 00000160         
+  229 00000160         invalid
+  230 00000160 B501            PUSH             {R0, LR}
+  231 00000162 F04F 002A       MOV              R0, #42
+  232 00000166 F7FF FFFE       BL               ST7735_OutChar
+  233 0000016A F04F 002E       MOV              R0, #46
+  234 0000016E F7FF FFFE       BL               ST7735_OutChar
+  235 00000172 F04F 002A       MOV              R0, #42
+  236 00000176 F7FF FFFE       BL               ST7735_OutChar
+  237 0000017A F04F 002A       MOV              R0, #42
+  238 0000017E F7FF FFFE       BL               ST7735_OutChar
+  239 00000182 F04F 002A       MOV              R0, #42
+  240 00000186 F7FF FFFE       BL               ST7735_OutChar
+  241 0000018A E8BD 4001       POP              {R0, LR}
+  242 0000018E 4770            BX               LR
+  243 00000190         
+  244 00000190         
+  245 00000190                 ALIGN
+  246 00000190         ;* * * * * * * * End of LCD_OutFix * * * * * * * *
+  247 00000190         
+  248 00000190                 ALIGN                        ; make sure the end
+                                                             of this section is
+                                                             aligned
+  249 00000190                 END                          ; end of file
+Command Line: --debug --xref --cpu=Cortex-M4 --apcs=interwork --depend=.\print.
+d -o.\print.o -IC:\Keil\ARM\RV31\INC -IC:\Keil\ARM\CMSIS\Include -IC:\Keil\ARM\
+Inc\Luminary --list=.\print.lst Print.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+.text 00000000
+
+Symbol: .text
+   Definitions
+      At line 18 in file Print.s
+   Uses
+      None
+Comment: .text unused
+LCD_OutDec 00000000
+
+Symbol: LCD_OutDec
+   Definitions
+      At line 31 in file Print.s
+   Uses
+      At line 14 in file Print.s
+Comment: LCD_OutDec used once
+LCD_OutFix 00000074
+
+Symbol: LCD_OutFix
+   Definitions
+      At line 115 in file Print.s
+   Uses
+      At line 15 in file Print.s
+Comment: LCD_OutFix used once
+case1 000000B4
+
+Symbol: case1
+   Definitions
+      At line 150 in file Print.s
+   Uses
+      At line 143 in file Print.s
+Comment: case1 used once
+case2 000000D6
+
+Symbol: case2
+   Definitions
+      At line 161 in file Print.s
+   Uses
+      At line 145 in file Print.s
+Comment: case2 used once
+case3 000000F0
+
+Symbol: case3
+   Definitions
+      At line 170 in file Print.s
+   Uses
+      At line 147 in file Print.s
+Comment: case3 used once
+case4 000000FA
+
+Symbol: case4
+   Definitions
+      At line 175 in file Print.s
+   Uses
+      At line 148 in file Print.s
+Comment: case4 used once
+checkPlace 00000016
+
+Symbol: checkPlace
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Relocatable symbols
+
+   Definitions
+      At line 43 in file Print.s
+   Uses
+      At line 40 in file Print.s
+      At line 48 in file Print.s
+
+checkPlace2 00000094
+
+Symbol: checkPlace2
+   Definitions
+      At line 131 in file Print.s
+   Uses
+      At line 128 in file Print.s
+      At line 136 in file Print.s
+
+continue 0000013E
+
+Symbol: continue
+   Definitions
+      At line 212 in file Print.s
+   Uses
+      At line 206 in file Print.s
+Comment: continue used once
+display 00000048
+
+Symbol: display
+   Definitions
+      At line 74 in file Print.s
+   Uses
+      At line 68 in file Print.s
+Comment: display used once
+display2 0000011A
+
+Symbol: display2
+   Definitions
+      At line 193 in file Print.s
+   Uses
+      At line 187 in file Print.s
+Comment: display2 used once
+endPlace 00000024
+
+Symbol: endPlace
+   Definitions
+      At line 49 in file Print.s
+   Uses
+      At line 42 in file Print.s
+      At line 45 in file Print.s
+
+endPlace2 000000A2
+
+Symbol: endPlace2
+   Definitions
+      At line 138 in file Print.s
+   Uses
+      At line 130 in file Print.s
+      At line 133 in file Print.s
+
+exit 00000070
+
+
+
+
+ARM Macro Assembler    Page 3 Alphabetic symbol ordering
+Relocatable symbols
+
+Symbol: exit
+   Definitions
+      At line 95 in file Print.s
+   Uses
+      At line 63 in file Print.s
+Comment: exit used once
+exit2 00000158
+
+Symbol: exit2
+   Definitions
+      At line 224 in file Print.s
+   Uses
+      At line 183 in file Print.s
+Comment: exit2 used once
+invalid 00000160
+
+Symbol: invalid
+   Definitions
+      At line 229 in file Print.s
+   Uses
+      At line 118 in file Print.s
+Comment: invalid used once
+loopOutput 00000028
+
+Symbol: loopOutput
+   Definitions
+      At line 56 in file Print.s
+   Uses
+      At line 93 in file Print.s
+Comment: loopOutput used once
+loopOutput2 000000FA
+
+Symbol: loopOutput2
+   Definitions
+      At line 176 in file Print.s
+   Uses
+      At line 159 in file Print.s
+      At line 168 in file Print.s
+      At line 173 in file Print.s
+      At line 221 in file Print.s
+
+placeDiv 0000003A
+
+Symbol: placeDiv
+   Definitions
+      At line 66 in file Print.s
+   Uses
+      At line 71 in file Print.s
+Comment: placeDiv used once
+placeDiv2 0000010C
+
+Symbol: placeDiv2
+   Definitions
+      At line 185 in file Print.s
+   Uses
+      At line 190 in file Print.s
+Comment: placeDiv2 used once
+21 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Absolute symbols
+
+decPlace 00000000
+
+Symbol: decPlace
+   Definitions
+      At line 28 in file Print.s
+   Uses
+      At line 52 in file Print.s
+      At line 59 in file Print.s
+      At line 90 in file Print.s
+      At line 92 in file Print.s
+
+decPlace2 00000000
+
+Symbol: decPlace2
+   Definitions
+      At line 112 in file Print.s
+   Uses
+      At line 140 in file Print.s
+      At line 179 in file Print.s
+      At line 202 in file Print.s
+      At line 218 in file Print.s
+      At line 220 in file Print.s
+
+input 00000004
+
+Symbol: input
+   Definitions
+      At line 29 in file Print.s
+   Uses
+      At line 34 in file Print.s
+      At line 58 in file Print.s
+      At line 78 in file Print.s
+      At line 80 in file Print.s
+
+input2 00000004
+
+Symbol: input2
+   Definitions
+      At line 113 in file Print.s
+   Uses
+      At line 122 in file Print.s
+      At line 178 in file Print.s
+      At line 197 in file Print.s
+      At line 199 in file Print.s
+
+overflow 0000270F
+
+Symbol: overflow
+   Definitions
+      At line 17 in file Print.s
+   Uses
+      At line 116 in file Print.s
+Comment: overflow used once
+5 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+External symbols
+
+ST7735_OutChar 00000000
+
+Symbol: ST7735_OutChar
+   Definitions
+      At line 12 in file Print.s
+   Uses
+      At line 86 in file Print.s
+      At line 152 in file Print.s
+      At line 154 in file Print.s
+      At line 156 in file Print.s
+      At line 158 in file Print.s
+      At line 163 in file Print.s
+      At line 165 in file Print.s
+      At line 167 in file Print.s
+      At line 172 in file Print.s
+      At line 210 in file Print.s
+      At line 214 in file Print.s
+      At line 232 in file Print.s
+      At line 234 in file Print.s
+      At line 236 in file Print.s
+      At line 238 in file Print.s
+      At line 240 in file Print.s
+
+ST7735_OutString 00000000
+
+Symbol: ST7735_OutString
+   Definitions
+      At line 13 in file Print.s
+   Uses
+      None
+Comment: ST7735_OutString unused
+2 symbols
+358 symbols in table

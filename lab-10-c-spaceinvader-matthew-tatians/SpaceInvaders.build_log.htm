@@ -1,0 +1,115 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+C:\Keil\EE319KwareSpring2018\lab-10-c-spaceinvader-matthew-tatians\SpaceInvaders.uvproj
+Project File Date:  04/29/2018
+
+<h2>Output:</h2>
+Rebuild target 'SpaceInvaders'
+assembling startup.s...
+assembling random.s...
+compiling DAC.c...
+compiling ADC.c...
+compiling Timer0.c...
+compiling Timer1.c...
+compiling Sound.c...
+assembling LCD.s...
+assembling Print.s...
+compiling SpaceInvaders.c...
+SpaceInvaders.c(424): warning:  #111-D: statement is unreachable
+                mainScreenAnimation();
+SpaceInvaders.c: 1 warning, 0 errors
+compiling ST7735.c...
+compiling PLL.c...
+compiling Graphics.c...
+compiling Timer2.c...
+compiling Timer3.c...
+compiling diskio.c...
+compiling ff.c...
+compiling SDCFile.c...
+SDCFile.c(68): warning:  #177-D: variable "g_sFatFs" was declared but never referenced
+  static FATFS g_sFatFs;
+SDCFile.c: 1 warning, 0 errors
+linking...
+Program Size: Code=14460 RO-data=4656 RW-data=14340 ZI-data=15532  
+".\SpaceInvaders.axf" - 0 Error(s), 2 Warning(s).
+</pre>
+</body>
+</html>
+ A, B, pause, B, pause, B, pause, pause, DFhi, pause, DFhi, pause, DFhi, pause, pause, B, pause, B, pause, B, pause, null};
+Sound.c(124): error:  #20: identifier "A" is undefined
+  uint32_t victorySequence[] = {E, GF, AF, A, B, B, B, B, B, B, pause, pause, pause, B, A, AF, A, B, pause, B, pause, B, pause, pause, DFhi, pause, DFhi, pause, DFhi, pause, pause, B, pause, B, pause, B, pause, null};
+Sound.c(124): error:  #20: identifier "B" is undefined
+  uint32_t victorySequence[] = {E, GF, AF, A, B, B, B, B, B, B, pause, pause, pause, B, A, AF, A, B, pause, B, pause, B, pause, pause, DFhi, pause, DFhi, pause, DFhi, pause, pause, B, pause, B, pause, B, pause, null};
+Sound.c(124): error:  #20: identifier "DFhi" is undefined
+  uint32_t victorySequence[] = {E, GF, AF, A, B, B, B, B, B, B, pause, pause, pause, B, A, AF, A, B, pause, B, pause, B, pause, pause, DFhi, pause, DFhi, pause, DFhi, pause, pause, B, pause, B, pause, B, pause, null};
+Sound.c(125): error:  #20: identifier "D" is undefined
+  uint32_t lossSequence[] = {D, pause, pause, DF, pause, pause, Clo, pause, pause, Blo, Blo, Blo, Blo, null};
+Sound.c(125): error:  #20: identifier "DF" is undefined
+  uint32_t lossSequence[] = {D, pause, pause, DF, pause, pause, Clo, pause, pause, Blo, Blo, Blo, Blo, null};
+Sound.c(125): error:  #20: identifier "Clo" is undefined
+  uint32_t lossSequence[] = {D, pause, pause, DF, pause, pause, Clo, pause, pause, Blo, Blo, Blo, Blo, null};
+Sound.c(125): error:  #20: identifier "Blo" is undefined
+  uint32_t lossSequence[] = {D, pause, pause, DF, pause, pause, Clo, pause, pause, Blo, Blo, Blo, Blo, null};
+Sound.c(126): error:  #20: identifier "Dlo" is undefined
+  uint32_t battleTheme[] = {Dlo, pause, Dlo, pause, Alo, Alo, pause, Dlo, pause, Dlo, pause, BFlo, BFlo, pause, Dlo, pause, Dlo, pause,
+Sound.c(126): error:  #20: identifier "Alo" is undefined
+  uint32_t battleTheme[] = {Dlo, pause, Dlo, pause, Alo, Alo, pause, Dlo, pause, Dlo, pause, BFlo, BFlo, pause, Dlo, pause, Dlo, pause,
+Sound.c(126): error:  #20: identifier "BFlo" is undefined
+  uint32_t battleTheme[] = {Dlo, pause, Dlo, pause, Alo, Alo, pause, Dlo, pause, Dlo, pause, BFlo, BFlo, pause, Dlo, pause, Dlo, pause,
+Sound.c(127): error:  #20: identifier "GFlo" is undefined
+        Alo, Alo, pause, Dlo, pause, Dlo, pause, GFlo, GFlo, pause, Dlo, pause, Dlo, pause, Alo, Alo, pause, Dlo, pause, Dlo, pause, DF, DF, pause,
+Sound.c(128): error:  #20: identifier "Alolo" is undefined
+        D, D, D, D, pause, Alolo, Alolo, Alolo, Alolo, pause, Clo, Clo, Clo, Clo, pause, Clolo, Clolo, Clolo, Clolo, pause, Dlo, Dlo, pause, pause, null};
+Sound.c(128): error:  #20: identifier "Clolo" is undefined
+        D, D, D, D, pause, Alolo, Alolo, Alolo, Alolo, pause, Clo, Clo, Clo, Clo, pause, Clolo, Clolo, Clolo, Clolo, pause, Dlo, Dlo, pause, pause, null};
+Sound.c(129): error:  #20: identifier "Ghi" is undefined
+  uint32_t entranceTheme[] = {Alo, Alo, Alo, A, pause, Alo, D, pause, pause, pause, pause, pause, Ghi, pause, pause, GFhi, pause, pause, Dhi, Alo, pause, E, pause, pause, 
+Sound.c(129): error:  #20: identifier "GFhi" is undefined
+  uint32_t entranceTheme[] = {Alo, Alo, Alo, A, pause, Alo, D, pause, pause, pause, pause, pause, Ghi, pause, pause, GFhi, pause, pause, Dhi, Alo, pause, E, pause, pause, 
+Sound.c(129): error:  #20: identifier "Dhi" is undefined
+  uint32_t entranceTheme[] = {Alo, Alo, Alo, A, pause, Alo, D, pause, pause, pause, pause, pause, Ghi, pause, pause, GFhi, pause, pause, Dhi, Alo, pause, E, pause, pause, 
+Sound.c(130): error:  #20: identifier "Elo" is undefined
+        Elo, Elo, Elo, A, pause, A, D, pause, pause, pause, pause, pause, E, pause, pause, D, pause, pause, Alo, GFlo, pause, Blo, pause, pause, Alo, D, pause, pause, D, E, E, 
+Sound.c(131): error:  #20: identifier "Glo" is undefined
+        D, D, Alo, Alo, BFlo, BFlo, Blo, pause, pause, D, E, Alo, pause, Ghi, pause, pause, GFhi, pause, D, pause, pause, pause, Glo, GFlo, pause, 
+Sound.c(132): error:  #20: identifier "G" is undefined
+        D, pause, B, A, pause, pause, G, pause, pause, G, pause, pause, E, D, E, GF, pause, pause, G, GF, pause, D, pause, Alo, D, pause, pause, Alo, 
+Sound.c(135): error:  #20: identifier "F" is undefined
+        D, D, D, F, F, BF, null}; 
+Sound.c(135): error:  #20: identifier "BF" is undefined
+        D, D, D, F, F, BF, null}; 
+Sound.c(138): error:  #20: identifier "DFlo" is undefined
+  uint32_t scaleSequence[] = {DFlo, Dlo, EFlo, Elo, Flo, GFlo, Glo, AFlo, Alo, BFlo, Blo, Clo, 
+Sound.c(138): error:  #20: identifier "EFlo" is undefined
+  uint32_t scaleSequence[] = {DFlo, Dlo, EFlo, Elo, Flo, GFlo, Glo, AFlo, Alo, BFlo, Blo, Clo, 
+Sound.c(138): error:  #20: identifier "Flo" is undefined
+  uint32_t scaleSequence[] = {DFlo, Dlo, EFlo, Elo, Flo, GFlo, Glo, AFlo, Alo, BFlo, Blo, Clo, 
+Sound.c(138): error:  #20: identifier "AFlo" is undefined
+  uint32_t scaleSequence[] = {DFlo, Dlo, EFlo, Elo, Flo, GFlo, Glo, AFlo, Alo, BFlo, Blo, Clo, 
+Sound.c(139): error:  #20: identifier "EF" is undefined
+        DF, D, EF, E, F, GF, G, AF, A, BF, B, C, 
+Sound.c(139): error:  #20: identifier "C" is undefined
+        DF, D, EF, E, F, GF, G, AF, A, BF, B, C, 
+Sound.c: 0 warnings, 30 errors
+assembling LCD.s...
+assembling Print.s...
+compiling SpaceInvaders.c...
+SpaceInvaders.c(424): warning:  #111-D: statement is unreachable
+                mainScreenAnimation();
+SpaceInvaders.c: 1 warning, 0 errors
+compiling ST7735.c...
+compiling PLL.c...
+compiling Graphics.c...
+compiling Timer2.c...
+compiling Timer3.c...
+compiling diskio.c...
+compiling ff.c...
+compiling SDCFile.c...
+SDCFile.c(68): warning:  #177-D: variable "g_sFatFs" was declared but never referenced
+  static FATFS g_sFatFs;
+SDCFile.c: 1 warning, 0 errors
+".\SpaceInvaders.axf" - 30 Error(s), 2 Warning(s).
+Target not created
