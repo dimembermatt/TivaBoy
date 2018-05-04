@@ -16,7 +16,7 @@
     by drawing objects in the buffer and then refreshing to the display. This allows for complex manipulation such as object collision,
     multiple object drawing, etc. *(See Graphics.c and its related files in order to see the working code)*
   4. *Hardware*: This project uses the TI TIVA TM4C1231C3PM microcontroller and associated hardware to operate. Schematics of this hardware 
-    can be found at:  . This project also contains a 3d printed chassis courtesy of Jason Nyugen at UT to house components and the overall 
+    can be found at: [here](TivaBoy/circuit schematic v1.pdf) . This project also contains a 3d printed chassis courtesy of Jason Nyugen at UT to house components and the overall 
     project. Solidworks files of this chassis can be found at: .
     
     
