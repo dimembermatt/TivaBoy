@@ -1,8 +1,5 @@
 # MusicBox
-### Personal project where the TM4C1231C3PM microcontroller is turned into a music player controlled by a simple user interface
-    that allows the user to scroll through a list of preprogrammed songs and play them. This is achieved using the hardware setup
-    specified here: and using the 3D printed chassis courtesy of Jason Nyugen at UT to house components and the overall project. 
-    Solidworks files of this chassis can be found at: .
+### Personal project where the TM4C1231C3PM microcontroller is turned into a music player controlled by a simple user interface that allows the user to scroll through a list of preprogrammed songs and play them. This is achieved using the hardware setup specified here: (https://github.com/dimembermatt/TivaBoy/blob/master/circuit%20schematic%20v1.pdf) and using the 3D printed chassis courtesy of Jason Nyugen at UT to house components and the overall project. Solidworks files of this chassis can be found at: .
 
 ###### - Operation:
     This project operates using the 6 bit Digital to Analog Converter to output sound as a voltage wave (sine wave, square wave, etc) 
