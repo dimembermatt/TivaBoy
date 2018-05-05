@@ -8,7 +8,7 @@
     - **Solo mode** is a battle between the Player (the user), and a rudimentary NPC that decides its actions based on which attack
       deals the most damage to the current Pokemon on the field.
     - The proposed **Multiplayer mode** allows two Player(s) to compete against each other, with a UART communication protocol
-      specified in *MultiplayerCommunicationProtocol.txt*.
+      specified in *MultiplayerCommunicationProtocol.txt*. 
   2. *6 bit Digital to Analog Converter* that configured for this game outputs sound effects and background music based on events
     (winning, losing, while the battle is running, main screen). *(See Sound.c, DAC.c, and ADC.c and their related files in order 
     to see the working code)*
@@ -23,5 +23,5 @@
 ### Proposed features:
   5. *UART multiplayer* communication based on the protocol specified in MultiplayerCommunicationProtocol.txt
   6. *Use of an external SD card* inserted into the ST7735 TFT formatted by the FAT32 file system and accessed using SDC.c and its related 
-    files to pull images and sound. This files are currently empty. Notes on implementation of this hardware can be found at:
+    files to pull images and sound. This files are currently empty. Notes on implementation of this hardware can be found at: (https://github.com/dimembermatt/TivaBoy/blob/master/circuit%20schematic%20v1.pdf)
     
