@@ -1,0 +1,49 @@
++communication protocol:
+  master controller generates random teams for both trainers, sends team data to secondary
+    controller, both teams go into battle sequence.
+  both players go through selection menu, when move is selected, the controller
+    waits for the other player to finish. Main controller receives both controller inputs,
+    runs calculations (who goes first, damage dealt, win condition), sends result back to
+    secondary controller. Both controllers check game end condition, if so, display end
+    battle animation and end communication. If not, loop back to selection menu.
+  if communication halts (i.e. someone disconnected), controllers wait x time for response. No response, display
+    comm error screen and go back to main screen. (or freeze and wait for shutdown)
+
+*****************************************************************************************************************************************
+  protocol:
+  //if msg is not received by either master or secondary within x time (5 seconds?), end communication.
+
+    start comm message: STX | E | E | 3 | 1 | 9 | K | ETX <- master sends this over and over, secondary waits for this message
+    received com msg:   STX | R | E | T | 0 | 0 | 1 | ETX <- secondary sends this back if start comm msg is received
+
+    //secondary now waits. Master begins generating trainers and teams.
+    sending teams:      STX | 2 | M | n | b | b | b | ETX
+                        STX | 3 | S | n | b | b | b | ETX
+    //master sends msg id (2 - my team), controller id (M/S), player id (n = 1|2) (for example, id can relate to a trainer in the lookup table, 0-15 options), and a byte packed 2 4-bit id of the pokemon in the team.
+    //byte packed can be simplified to just 000nnnn and ***teams shortened to three if necessary.*** <- looks like this most likely
+    //secondary must receive message with id 2 and send a RET002 confirmation and so on with id3 (your team) with RE003.
+
+    //both controllers now have trainer and team information. controllers can now look up trainer image and pokemon/move image.
+    //intro battle animation begins.
+    //selection menu for both controllers begin
+
+    //if master selects first, wait for secondary. if secondary selects first, send to master and waits.
+    select message:     STX | 4 | S | c | p (optional) | np (optional) | m (optional) | ETX <- secondary sends this back to signify it has selected.
+    //master must receive message with id 4 and send RET004 confirmation to get receiver to stop.
+    //secondary sends msg id (4 - I moved), S - confirming its from secondary, c - command (attack, switch, forfeit),
+    //b (0 if switch/forfeit) - pokemon moving, np (0 if not switch, else id of pokemon coming out), m (0 if switch/forfeit) - move selected
+
+    //master compiles data:
+      //check if master or secondary surrendered. if so, send end msg.
+      //check if master or secondary switched. give switch mandatory priority. switch in new pokemon with x id and damage calc.
+      //check if master or secondary both attacked. damage calc.
+    result message:     STX | 5 | M | n | b | m | d | ETX <- master sends this to secondary
+    //5 - msg id (when I hit), M - master, n - trainer id, b - pokemon hit, m - move used, d - damage done (0 if miss, 0xFF if flinch, 0xXX some code for crit)
+                        STX | 6 | S | n | b | m | d | ETX
+    //6 - msg id (when you hit), S - slave, n - trainer id, b - pokemon hit, m - move used, d - damage done
+                        STX | 7 | M | n | 0 | 0 | 0 | ETX
+    //7 - msg id (someone surrendered), M - master, n - who surrendered
+      //both master and secondary controller then go through end animation with winner animation.
+    //after message 5 and 6 have been sent and replied to (RET005, RET006)
+      //both controllers do gamestate checks - apply damage, check fainted. If no pokemon on one side are alive, both go through ending animations.
+      //if one pokemon faints or none faint, both controllers go through selection again. Unfortunately, the side who fainted loses a turn switching (other options disabled).
