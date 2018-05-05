@@ -23,5 +23,5 @@
 ### Proposed features:
   5. *UART multiplayer* communication based on the protocol specified in MultiplayerCommunicationProtocol.txt
   6. *Use of an external SD card* inserted into the ST7735 TFT formatted by the FAT32 file system and accessed using SDC.c and its related 
-    files to pull images and sound. This files are currently empty. Notes on implementation of this hardware can be found at: (https://github.com/dimembermatt/TivaBoy/blob/master/circuit%20schematic%20v1.pdf)
+    files to pull images and sound. This files are currently empty. Notes on implementation of this hardware can be found at: (https://github.com/dimembermatt/TivaBoy/blob/master/SDCworkflow.txt)
     
