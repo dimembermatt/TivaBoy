@@ -1,0 +1,77 @@
+MusicBox writeup:
+The TivaBoy music box currently supports hand transcribed music on one staff to output on the 6 bit DAC
+  of the TivaBoy.
+However, attempts across the last month (and a half) to output a wav - converted to text - file have been
+  rendered as failures, producing only static and possibly hints of a rhythm to said static.
+  Problems considered in the implementation of sound from wav files include:
+    1.  The 6-bit DAC might be too low of a precision to output sound of recognizable quality.
+    2.  Implementing an SD card to "grab sound" in array sizes of up to 30 thousand elements
+      uses up too much time (opening the file, reading, setting the array, closing the file)
+      in comparison to the interrupt period, which is on the magnitude of microseconds.
+    3.  The methodology used to calculate the frequency required for the interrupt is wrong.
+      Extensive testing by reconfirming the period and cross-checking the outputs from the
+      mp3 to wav conversion and the wav to txt conversions (using wavConv) and then the text file
+      itself to what the waveform should match with the audio representation suggests that this
+      shouldn't be the case.
+
+Considerations are being made to instead focus on the first mode of music production, using small sized
+  arrays to output frequencies of predefined values. This involves a timer to output the waveform at a
+  predefined frequency and another timer to change the waveform at intervals defined as the beat.
+
+A development of this mode involves producing music that involve 'chords', allowing for multiple notes
+  to be played at once. There are two proposed implementations to this idea.
+  1.  Using multiple timers - one for each note in a chord, and a multiple dimensional array that defines
+    whether there are one, two, etc notes in said beat of the music.
+
+    Drawbacks to this solution include a limited amount of timers available to the machine: the amount of
+    notes in a chord specified cannot exceed the max timers specified.
+    Another drawback is that this method does not practically realize the property of a chord being a
+    superposition of multiple frequencies. At best, if the interrupt timers of multiple notes do not
+    interact with each other, something like the intended result may be outputted.
+
+    This primary advantage of this method is that in comparison to method 2, the amount of programming
+    (getting the data into format for a usable array) and the overall complexity is much simpler.
+
+  2.  The second option is to have a single timer output at a frequency following Nyquist's theorem -
+    that is, a frequency at least twice the highest frequency note in the sample. The sample (not the
+    sine wave) will therefore be fixed to output at this frequency, and the resulting output would be
+    a superposition of waves of multiple frequency (a Fourier transformation).
+
+    This sounds particularly similar to the failed attempt to play a wav file, that has provided the output
+    voltage to the DAC and a frequency to output the output.
+    In contrast, this method will not be left to external conversion sources and the instead the input array
+    will be closer to that described in solution 1: multi dimensional, with notes of a chord described within
+    (say, a chord for A and B in index 4 -say this is beat 3- as arr[3] = 3,A; 3,B; 3;0 where A, B, and 0 are
+    the indicated notes of that index)
+
+    Advantages to this method in comparison to the others is that the frequency of the output - the output
+    speed- is strictly restricted to the tempo and the beat division of the song. If at a tempo of 70 beats
+    per minute (bpm), the quarter note gets the beat, and the smallest subdivision in the music is an eighth note,
+    the highest frequency that the notes are changed at will be:
+      70 bpm * 1 m/60 s * 2 eighth notes/1 quarter note * 1 quarter note/1 beat = 70/30 eighth notes/20sec
+      which can be translated into the duration of the interrupt.
+
+    This was similarly done with the original MusicBox code, where the songs outputted were given a set frequency
+    (arbitrarily by the programmer) that corresponded to the smallest subdivision and each entry in the music
+    array was in units of the smallest subdivision.
+
+    Another advantage is that resource wise, this method frees up the timer to use for other purposes, such
+    as a graphics refresh on the screen. Less timers means less potential for conflicts and resulting in
+    the machine to decide based on priority who goes first, which may distort sound quality.
+
+    Disadvantages to this method (as partially seen by the already long essay above about the implementation)
+    is that implementation will be much more complex than other solutions. Not only will the drivers have to be
+    written to take array data, figure out what notes are playing, and superimpose them into an output, work will
+    have to be done to create software (or go painstakingly by hand) to interpret songs into the components
+    needed to be inserted into the array. Current consideration of the implementation involves using openCV with
+    Python to read sheet music and transcribe them into an array (which is a whole new level completely to parsing
+    MIDIs or WAVs or whatever sound file of your choice).
+
+    Another disadvantage is that this method will involve the generation of instrument/sound tables much more complex
+    than currently (a 32 element sine array). Since the periods of varying notes are different, the sine array will have to
+    either be squished/pulled and its approximation matched to the pulled value from the other frequency at the
+    interrupt call or multiple tables - for every frequency - must be created at a resolution that allows both frequency calls
+    to be superimposed upon each other without distortion. Evidently, the second idea is more efficient time wise and more
+    accurate, but much more costly in terms of memory.
+
+    In addition to these considerations, implementation of a new scale format is under consideration.
