@@ -235,3 +235,22 @@ set 2
       //if not in file, return size 0
       return 0;
     }
+
+
+//flowchart of current interation
+first run through:
+1)  { is encountered, internal control flag is set. initfPointer is set to the first element of the .txt array
+2)  3 is encountered, since { sets delim flag, 3 is read as the first of possibly 2 number ASCII characters.
+    flag is reset.
+3)a. 2 is encountered, and is read as the second of 2 number ASCII characters. flag is reset.
+  b. , is encountered. since the flag has been reset, convert what has been found into a number (excluding
+    values that are 0xFF), insert into the global array, and raise the flag again. reset value holders to default 0xFF.
+4)  }/EOF is encountered, and the current pointer is reset to the initfPointer. 2 and 3 repeat.
+5) the array has been filled. the internal idx hits 400 (or 399), the current fPointer + 1 is saved, and the
+   function exits, returning 1 for success.
+
+second run through:
+0) since the song text array has been assumed to be static (no current implementation of switching songs),
+   the internal control flag has already been set to 1, and the initfPointer has been initialized.
+1) on the next call, the control flag is checked (1), and fPointer is set to the current fPointer.
+2) continue reading as expected.
