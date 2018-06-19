@@ -1,0 +1,105 @@
+The Interpretable Music Format is explicitly for the purpose of creating a readable file format that allows for quick and easy conversion and interpretation of sheet music to microcontrollers.
+
+The functions are not limited to this and others interested are encouraged to expand upon or create formats that suit their needs or think they can improve upon the format.
+
+The format consists of two main parts, a HEADER and a BODY. The file itself can be in binary or ASCII, although both are obvious in their advantages and disadvantages.
+
+A ASCII-binary converter is also thusly proposed to help understand the contents and structure of the format.
+
+This format assumes the following:
+~ The notes are associated with the available tones present on a standard PIANO. No other instruments are considered (or is up to the programmer to create support for (sound envelope, etc)
+~ The format has been converted from sheet music adjusting for key signatures and accidentals.  All notes are converted into pure tones with no classifiable distinction besides value.
+~ The smallest readable note is a 16th note. (calculations on the efficacy of the microcontroller to switch notes at smaller periods has not been made.)
+~ Other artefacts of music, such as articulation marks or ornaments are not included in this format. This could be solved (if the converter can identify and assign these artefacts accurately) by providing an optional field in the BODY after the WIDTH that indicates an artefact with a given identification.
+______________________________________________________________________________________________
+In ASCII, the format consists of a HEADER that contains the following information in the stated order:
+~ NAME (10 character limit)
+~ ITS: Initial Tempo Signature (i.e. quarter note = 90 bpm)
+
+The Name is the identifier for the piece.
+The Initial Tempo Signature describes the tempo of the given note.
+	(Consideration should be given to whether the tempo should be for the smallest note division or for the note provided in the sheet music)
+
+The NAME is a 10 char length binary/ASCII field that can be filled by the interpreter. It is an optional field that is set at 0 when undefined.
+	I.E.: song name - "Hello World" -> 	Hello_World  {
+	I.E.: song name - "Clocks" -> 		Clocks____  {
+	I.E.: song name - blank -> 		__________  {
+
+The ITS is a three byte field that sets both the smallest note and the tempo of the smallest note. This is a mandatory field that sets the interpreter's 
+	I.E.: eighth note, 100 bpm ->		2|100 -> 0010 0110 0100
+______________________________________________________________________________________________
+Following the HEADER is a 2 character length null space followed by the character symbol: '{', indicating to the interpreter that the HEADER has ended and the BODY has started.
+______________________________________________________________________________________________
+Next is the BODY, which is ended by the delimiter called by the character symbol: '}'.
+The BODY consists of a list of notes or special flags ordered by time of appearance.
+
+The BODY is subclassified into the following values.
+~ POSITION: delimits a change between times. The time difference is that of the smallest note.
+~ PITCH: a number from 1-N associated with a corresponding tone on a piano (roughly 1-84?)
+~ WIDTH: the length of the pitch. If the pitch is a sixteenth note, the length is 1, where a whole note is scaled appropiately (16).
+
+The POSITION describes a change in time as a delimeter '|'. When '|' is called, it means that the next 16th/smallest denominator time has changed.
+	I.E.: A at 0, B at 1 ->			A2|B1
+
+The PITCH describes the note tone that occurs at the time. It is a 2 byte field ranging from 0-127.
+	I.E.: C1 = 1, D1 = 2, C5 = 84
+
+The WIDTH determines the length of the note that appears at the time. It is a 2 byte field with the width based on the smallest denomination (16th note) and each denomination has its own value.
+
+	List of note widths:
+		~ sixteenth 1
+		~ eighth 2
+		~ quarter 4
+		~ half 8
+		~ whole 16
+	I.E.: C1 with width of quarter note	C1 4 -> 0000 0001 0000 0100
+	
+______________________________________________________________________________________________
+Notes:
+
+Since this format is ordered by time of appearance, it is made so a quarter note will not need to be converted to appear at time 0 to time 4. The interpreter should recognize the appearance and length of the note and consider it in its processes to display/output music.
+
+This formant also addresses the concept of chords or multiple notes/multiple channels. When calling two notes at the same time, they appear in the same section before the delimeter, and their lengths determine when they peter out.
+	I.E.: A1 with length 1 and C1 with length 2 played at the same time
+						A1 1 C1 2 | Nn Ll Nn Ll...
+
+Dotted notes can be represented by adding note width values together. A dotted quarter note can be represented by adding a quarter value with an eighth value (determined by the converter) to equal 6 (2 + 4).
+
+______________________________________________________________________________________________
+Example Song:
+	Floaroma Town, Composed by Hitomi Sato and arranged by Darren Ang Quarter note is 100 bpm.
+
+	Floaroma_T  DTt{NnLl|NnLlNnLl||NnLl...}
+	Floaroma_T__0100 1100 0100{C3 4|0 0|0 0|0 0|E3 4|0 0|0 0|0 0|G3 4...} /*first measure*/
+	/*ignore whitespace*/
+
+Key:	Nn - PITCH
+	Ll - WIDTH
+	| - POSITION delimiter
+	DTt - ITS
+
+______________________________________________________________________________________________
+Probable Issues:
+
+The file is cumbersome to transcribe by hand, progressively becoming more repetitive or redundant as single long notes are transcribed. A measure with just a whole note, using a 16th note as the smallest denominator, would translate into 1 section of notes and 15 sections of empty bytes.
+
+While a computer automated transcriber should be able to automate this process with few problems, eliminating its unease of use to the human, this issue still represents a chunk of wasted data space.
+
+A possible solution to this issue is writing compatible interpreters that are able to read a compressed format and extrapolate empty measure data from within. Therefore the format could then have a flag that denotes a transition of time without any new occurrences of notes, saving space and time reading the file.
+
+An example format could be of the following:
+	Floaroma_T__0100 1100 0100{C3 4|!3|E3 4|!3|G3 4...} /*first measure*/
+	/*ignore whitespace*/
+
+As can be seen, a '!' character is used to indicate a transition in time, followed by a character length number that represents how many denominator period transitions occur across this period. The interpreter picks up on the next measure, having extrapolated the next N locations in its array that works with the desired output.
+
+______________________________________________________________________________________________
+Example Song with transitions:
+
+	Floaroma_T__0100 1100 0100{
+		C3 4|!3|E3 4|!3|G3 4|!3|	/*end of measure*/
+		C3 4|!3|E3 4|!3|G3 4|!3|
+		E5 8 C3 4|!3|E3 4|!3|G4 4 G3 4|!3|
+		G4 4 C3 4|E5 4 E3 4|C5 4 G3 4|!3|
+		...
+		}
