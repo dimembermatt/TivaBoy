@@ -1,9 +1,12 @@
-// Sound.c
-// Runs on any computer
-// Sound assets based off the original Space Invaders 
-// Import these constants into your SpaceInvaders.c for sounds!
-// Jonathan Valvano
-// November 17, 2014
+/**
+ * Sound.c
+ * uses the onboard clocks of the TM4C to output music through the DAC
+ * runs on LM4F120 or TM4C123
+ * @author: Matthew Yu
+ * Last Modified: 11/28/18
+ * 	11/28/18 - standardized comment style, preparing for port to C++
+ **/
+ 
 #include <stdint.h>
 #include "Sound.h"
 #include "DAC.h"
@@ -113,8 +116,8 @@ void Enable_BGM(void);
 //softer and centered around 32 to allow for amplification
 unsigned char sineArr[32] = {32, 34, 36, 38, 39, 40, 41, 42, 42, 42, 41, 40, 39, 38, 36, 34, 32, 30, 28, 26, 25, 24, 23, 22, 22, 22, 23, 24, 25, 26, 28, 30};
 unsigned char guitarArr[32] = {31, 31, 29, 27, 26, 29, 34, 37, 38, 35, 30, 28, 31, 37, 41, 40, 36, 33, 31, 31, 32, 34, 34, 33, 30, 28, 29, 29, 29, 30, 31, 31};
-	
-uint32_t JubilifeCity[] = {A2, A2, A2, A3, pause, A2, D3, pause, pause, pause, pause, pause, 
+
+uint32_t JubilifeCity[] = {A2, A2, A2, A3, pause, A2, D3, pause, pause, pause, pause, pause,
   G3, pause, pause, Fs3, pause, pause, D3, A2, pause, E3, pause, pause,
   E2, E2, E2, A3, pause, E2, D3, pause, pause, pause, pause, pause,
   E3, pause, pause, D3, pause, pause, A2, Fs2, pause, B3, pause, pause,
@@ -186,8 +189,8 @@ uint32_t SeaofTime[] = {E3, E3, E3, D3, D3, D3, E3, D3,
   E3, A3, A3, A3, A3, A3, A3, A3,
   pause, pause, pause, pause, G3, B3, C4, D4, null}; //eighth note smallest denom, fast
 
-uint32_t LittlerootTown[] = {pause, C2, F2, G2, 
-  A2, A2, A2, G2, A2, G2, A2, Bf2, 
+uint32_t LittlerootTown[] = {pause, C2, F2, G2,
+  A2, A2, A2, G2, A2, G2, A2, Bf2,
   C3, C3, C3, D3, A2, A2, A2, Cs3,
   D3, D3, E3, E3, Cs3, Cs3, A2, G2,
   F2, E2, F2, A2, D3, D3, D2, E2,
@@ -213,11 +216,11 @@ uint32_t LittlerootTown[] = {pause, C2, F2, G2,
   E3, E3, E3, F3, G3, G3, Bf2, G2, null}; //eighth note lowest denom
 
 
-uint32_t TwinleafTown[] = {G2, G2, C3, C3, B2, C3, C3, D3, 
-  E3, E3, Af2, A2, A2, Bf2, Bf2, Bf2, 
+uint32_t TwinleafTown[] = {G2, G2, C3, C3, B2, C3, C3, D3,
+  E3, E3, Af2, A2, A2, Bf2, Bf2, Bf2,
   A2, A2, D3, D3, Df3, D3, D3, E3,
   F3, F3, F2, G2, G2, Af2, Af2,
-  D3, D3, C3, C3, G2, C3, C3, C3, 
+  D3, D3, C3, C3, G2, C3, C3, C3,
   B2, B2, A2, A2, D3, D3, Ef3, E3,
   E3, E3, F3, F3, A2, A2, C3, C3,
   B2, B2, C3, C3, A2, A2, Af2, Af2,
@@ -237,25 +240,25 @@ uint32_t TwinleafTown[] = {G2, G2, C3, C3, B2, C3, C3, D3,
   D3, D3, Ef3, D3, C3, Af2, Af2, Af2,
   C3, C3, C3, C3, C3, C3, C3, C3,
   C3, C3, C3, C3, C3, C3, C3, C3,
-  F3, F3, F3, F3, C3, C3, C3, C3, 
-  null}; //eighth note lowest denom	
-	
-	
+  F3, F3, F3, F3, C3, C3, C3, C3,
+  null}; //eighth note lowest denom
+
+
 	//uint32_t battleTheme[] = {Dlo, pause, Dlo, pause, Alo, Alo, pause, Dlo, pause, Dlo, pause, BFlo, BFlo, pause, Dlo, pause, Dlo, pause,
 	//Alo, Alo, pause, Dlo, pause, Dlo, pause, GFlo, GFlo, pause, Dlo, pause, Dlo, pause, Alo, Alo, pause, Dlo, pause, Dlo, pause, DF, DF, pause,
 	//D, D, D, D, pause, Alolo, Alolo, Alolo, Alolo, pause, Clo, Clo, Clo, Clo, pause, Clolo, Clolo, Clolo, Clolo, pause, Dlo, Dlo, pause, pause, null};
 
-	
+
 
 
 
 
 
 unsigned char *sfx;
-	
+
 uint32_t *bgm;
 unsigned char *wavArr;
-	
+
 uint8_t mode, BGM_on;
 uint8_t BGM_idx = 0;
 
@@ -264,7 +267,7 @@ uint8_t BGM_idx = 0;
 void Sound_Init(void){
 	//Timer1_Init(&PlaySFX, period);
 	Timer0_Init(&PlayBGM, 0xFFFFFF);	//dummy value, interrupt reload value set by note frequency
-	
+
 	SysTick_Init();
 };
 
@@ -278,8 +281,8 @@ void Sound_Init(void){
  *plays bgm until disabled by end_BGM
  */
 void PlayBGM(void){
-	//play a note of x frequency until end_SFX is called - 
-	static uint8_t idx3 = 0; 
+	//play a note of x frequency until end_SFX is called -
+	static uint8_t idx3 = 0;
 	int8_t mVal;
 	uint8_t modifier = getVolumeModifier();
 	//if modifier = 0, mVal = 0
@@ -292,29 +295,29 @@ void PlayBGM(void){
 		DAC_Out(wavArr[idx3] * modifier);
 	else
 		DAC_Out(wavArr[idx3] + mVal);
-	
+
 	//dump[idx3] = sineArr[idx3] + mVal;
 	idx3 = (idx3 + 1) % 32;
-}	
+}
 
 /**
- *ChangeBGM switches reference BGM that the interrupt handlers play.
- */
+ * ChangeBGM switches reference BGM that the interrupt handlers play.
+ **/
 void ChangeBGM(uint32_t *newBGM, uint32_t newSpeed, unsigned char *newInstr){
 	bgm = newBGM;
 	wavArr = guitarArr;
-  NVIC_ST_CTRL_R = 0;                   // disable SysTick during setup
-  NVIC_ST_RELOAD_R = newSpeed;					// reload value to 1ms bus clock
-  NVIC_ST_CURRENT_R = 0;                // any write to current clears it
-  NVIC_SYS_PRI3_R = (NVIC_SYS_PRI3_R&0x00FFFFFF)|0x40000000;                                      // enable SysTick with core clock
-  NVIC_ST_CTRL_R = 0x07;//NVIC_ST_CTRL_ENABLE+NVIC_ST_CTRL_CLK_SRC;
-	BGM_on = 1;	
+  	NVIC_ST_CTRL_R = 0;				// disable SysTick during setup
+  	NVIC_ST_RELOAD_R = newSpeed;	// reload value to 1ms bus clock
+  	NVIC_ST_CURRENT_R = 0;			// any write to current clears it
+  	NVIC_SYS_PRI3_R = (NVIC_SYS_PRI3_R&0x00FFFFFF)|0x40000000;                                      // enable SysTick with core clock
+  	NVIC_ST_CTRL_R = 0x07;//NVIC_ST_CTRL_ENABLE+NVIC_ST_CTRL_CLK_SRC;
+	BGM_on = 1;
 	BGM_idx = 0;
 };
 
 /**
-*end_BGM disables Timer0A
-*/
+ * end_BGM disables Timer0A
+ **/
 void end_BGM(void){
 	TIMER0_CTL_R = 0x00000000;
 };
@@ -324,8 +327,8 @@ void end_BGM(void){
 
 
 /**
-*Temporarily in charge of picking the notes and changing the frequency for PlayBGM
-*/
+ * Temporarily in charge of picking the notes and changing the frequency for PlayBGM
+ **/
 void SysTick_Handler(void){
 	//only play notes if BGM_on is active
 	if(BGM_on == 1){
@@ -337,7 +340,7 @@ void SysTick_Handler(void){
 		if(bgm[BGM_idx] != pause){
 			TIMER0_TAILR_R = bgm[BGM_idx]-1;
 			TIMER0_TAPR_R = 0;
-			TIMER0_CTL_R = 0x00000001; 
+			TIMER0_CTL_R = 0x00000001;
 		}
 		else
 			end_BGM();
@@ -346,11 +349,11 @@ void SysTick_Handler(void){
 }
 
 void SysTick_Init(void){
-  NVIC_ST_CTRL_R = 0;                   // disable SysTick during setup
-  NVIC_ST_RELOAD_R = 727240*15;					// reload value to 1ms bus clock
-  NVIC_ST_CURRENT_R = 0;                // any write to current clears it
-  NVIC_SYS_PRI3_R = (NVIC_SYS_PRI3_R&0x00FFFFFF)|0x40000000;                                      // enable SysTick with core clock
-  NVIC_ST_CTRL_R = 0x07;//NVIC_ST_CTRL_ENABLE+NVIC_ST_CTRL_CLK_SRC;
+	NVIC_ST_CTRL_R = 0;					// disable SysTick during setup
+	NVIC_ST_RELOAD_R = 727240*15;		// reload value to 1ms bus clock
+	NVIC_ST_CURRENT_R = 0;				// any write to current clears it
+	NVIC_SYS_PRI3_R = (NVIC_SYS_PRI3_R&0x00FFFFFF)|0x40000000;                                      // enable SysTick with core clock
+	NVIC_ST_CTRL_R = 0x07;//NVIC_ST_CTRL_ENABLE+NVIC_ST_CTRL_CLK_SRC;
 	BGM_on = 1;
 }
 
@@ -361,4 +364,3 @@ void Disable_BGM(void){
 void Enable_BGM(void){
 	BGM_on = 1;
 }
-

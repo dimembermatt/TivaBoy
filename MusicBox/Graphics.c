@@ -1,8 +1,11 @@
-// Graphics.c
-// Runs on any computer
-// graphics functions and image assets
-// Matthew Yu and Tatian Flores
-// 4/26/18
+/**
+ * Graphics.c
+ * graphics functions and image assets
+ * @author: Matthew Yu and Tatian Flores
+ * Last Modified: 11/28/18
+ * 11/28/18 - standardized comment style FOR HEADER SO FAR
+ **/
+
 #include <stdint.h>
 #include "../inc/tm4c123gh6pm.h"
 #include "ST7735.h"										//display
@@ -412,7 +415,7 @@ unsigned short PlayingFieldBuffer[120*60];
 	//grab contents from file
 	//search prototype for identifier, generate array size
 //}
-	
+
 /**
 *Graphics_Init sets up Timer3 interrupt
 */
@@ -525,7 +528,7 @@ void jump(uint16_t x, uint16_t y, const unsigned short sprite[], uint16_t width,
 		for(int i = 72724*3/2; i > 0; i--);
 		unDraw_Sprite(x, y + up, width, height);
 	}
-	for(down = 0; down < 15; down += speed){ 
+	for(down = 0; down < 15; down += speed){
 		Draw_Sprite(x, y + up - down, sprite, width, height);
 		for(int i = 72724*3/2; i > 0; i--);
 		unDraw_Sprite(x, y + up - down, width, height);
@@ -542,8 +545,8 @@ void mainScreenAnimation(void){
 	//setup graphics interrupt
 	Clear_Buffer(0xFFFF);
 	Set_Screen(0);
-	Start_Refresh();	
-	
+	Start_Refresh();
+
 	//animation
 	Pikachu_Cry();
 	jump(x, y, Pikachu2, width, height, 1);
@@ -552,7 +555,7 @@ void mainScreenAnimation(void){
 		for(int i = 72724*2; i > 0; i--);
 		unDraw_Sprite(x - left, y, width, height);
 	}
-	
+
 	Stop_Refresh();
 }
 /**
@@ -564,8 +567,8 @@ void pkmnTrainerRedAnimation(void){
 	Clear_Buffer(0xFFFF);		//set buffer to white
 	Set_Screen(0);
 	Start_Refresh();
-	
-	for(int i = 0; i < 10; i++){ 
+
+	for(int i = 0; i < 10; i++){
 		Draw_Sprite(45, 0, Red2, 25, 45);
 		jump(63, 28, pokeball2, 7, 7, 1);
 	}
